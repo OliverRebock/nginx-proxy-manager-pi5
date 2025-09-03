@@ -76,13 +76,13 @@ echo "📁 Erstelle Verzeichnisse..."
 mkdir -p ./config/nginx
 mkdir -p ./config/letsencrypt
 mkdir -p ./data
-mkdir -p ./nginx-config/custom
+mkdir -p ./data/nginx/custom
 
 # Setze korrekte Berechtigungen
 echo "🔐 Setze Berechtigungen..."
 chmod 755 ./config
 chmod 755 ./data
-chmod 755 ./nginx-config
+chmod -R 755 ./data/nginx
 
 # Erstelle Basic Auth Datei
 echo ""
@@ -150,9 +150,9 @@ if [ "$auth_success" = false ]; then
     
     # Erstelle eine temporäre .htpasswd mit Standard-Passwort
     echo "⚠️ Erstelle temporäre Basic Auth mit Passwort 'changeme123'"
-    echo 'changeme123' | htpasswd -c -i ./nginx-config/custom/.htpasswd admin
+    echo 'changeme123' | htpasswd -c -i ./data/nginx/custom/.htpasswd admin
     echo "🔧 WICHTIG: Ändere das Passwort nach dem Setup mit:"
-    echo "   htpasswd ./nginx-config/custom/.htpasswd admin"
+    echo "   htpasswd ./data/nginx/custom/.htpasswd admin"
 fi
 
 # Erstelle selbstsignierte Zertifikate für interne Domain

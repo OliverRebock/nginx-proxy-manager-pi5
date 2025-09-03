@@ -13,11 +13,9 @@ services:
       # Admin Web Port
       - '81:81'
     volumes:
-      # NPM Daten und Konfiguration
+      # NPM Daten und Konfiguration (alles wird hier gespeichert)
       - ./data:/data
       - ./config/letsencrypt:/etc/letsencrypt
-      # Nur für zusätzliche Custom Configs (optional)
-      - ./nginx-config/custom:/data/nginx/custom:ro
     environment:
       # Sichere Standardkonfiguration
       - DB_SQLITE_FILE=/data/database.sqlite
