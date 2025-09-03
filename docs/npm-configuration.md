@@ -65,17 +65,50 @@ Interne Domains brauchen Custom Zertifikate.
 
 **Schritt 4a: Zertifikat erstellen (auf dem Pi)**
 ```bash
-# Falls noch nicht vorhanden, erstelle SSL Zertifikate
+# Verwende das verbesserte Script für browser-kompatible Zertifikate
 cd ~/nginx-proxy-manager-pi5
-mkdir -p ssl-certs
+chmod +x scripts/generate-ssl-cert.sh
+./scripts/generate-ssl-cert.sh
+```
 
-# Erstelle selbstsigniertes Zertifikat
+**ODER manuell mit korrekten Extensions:**
+```bash
+# SSL Config Datei erstellen
+cat > /tmp/ssl-chef.conf << EOF
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions = v3_req
+prompt = no
+
+[req_distinguished_name]
+C = DE
+ST = Germany
+L = Home
+O = HomeNetwork
+OU = IT Department
+CN = chef.fritz.box
+
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = chef.fritz.box
+DNS.2 = chef
+DNS.3 = localhost
+IP.1 = 127.0.0.1
+EOF
+
+# Zertifikat mit korrekten Server-Extensions erstellen
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout ssl-certs/chef.fritz.box.key \
     -out ssl-certs/chef.fritz.box.crt \
-    -subj "/C=DE/ST=Germany/L=Home/O=HomeNetwork/OU=IT/CN=chef.fritz.box"
+    -extensions v3_req \
+    -config /tmp/ssl-chef.conf
 
-# Zertifikat-Inhalte anzeigen zum Kopieren
+# Zertifikat-Inhalte anzeigen
 echo "=== PRIVATE KEY ==="
 cat ssl-certs/chef.fritz.box.key
 echo "=== CERTIFICATE ==="

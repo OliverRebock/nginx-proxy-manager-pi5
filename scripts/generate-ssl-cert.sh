@@ -29,7 +29,8 @@ CN = chef.fritz.box
 emailAddress = admin@chef.fritz.box
 
 [v3_req]
-keyUsage = keyEncipherment, dataEncipherment
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 
@@ -41,10 +42,11 @@ IP.1 = 127.0.0.1
 IP.2 = $(hostname -I | awk '{print $1}')
 EOF
 
-# Erstelle Zertifikat mit 2048-bit RSA Schlüssel, gültig für 365 Tage
+# Erstelle Zertifikat mit korrekten Extensions für Server-Authentifizierung
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout ./ssl-certs/chef.fritz.box.key \
     -out ./ssl-certs/chef.fritz.box.crt \
+    -extensions v3_req \
     -config /tmp/ssl-chef.conf
 
 # Aufräumen
