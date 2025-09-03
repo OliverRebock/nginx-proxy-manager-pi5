@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      # HTTP Port
+      - '80:80'
+      # HTTPS Port  
+      - '443:443'
+      # Admin Web Port
+      - '81:81'
+    volumes:
+      # Konfigurationsdateien
+      - ./config/nginx:/app/config
+      - ./config/letsencrypt:/etc/letsencrypt
+      - ./data:/data
+      # Nginx Konfiguration mounten für manuelle Bearbeitung
+      - ./nginx-config:/etc/nginx/conf.d
+    environment:
+      # Sichere Standardkonfiguration
+      - DB_SQLITE_FILE=/data/database.sqlite
+      - DISABLE_IPV6=true
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:81/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  proxy-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

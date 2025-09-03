@@ -1,0 +1,49 @@
+# Ignorierte Dateien für Git
+
+# Umgebungsvariablen
+.env
+
+# Docker Volumes / Daten
+/data/
+/config/
+!/config/.gitkeep
+
+# SSL Zertifikate und private Schlüssel
+/nginx-config/ssl/
+/nginx-config/.htpasswd
+
+# Logs
+*.log
+/logs/
+
+# Backups
+/backups/
+*.tar.gz
+*.zip
+
+# Temporäre Dateien
+.tmp/
+.cache/
+
+# Editor Dateien
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS spezifische Dateien
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node modules (falls später verwendet)
+node_modules/
+
+# Python (falls Scripts verwendet werden)
+__pycache__/
+*.pyc
+*.pyo
+
+# Let's Encrypt Challenge Dateien
+.well-known/
