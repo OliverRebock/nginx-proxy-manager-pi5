@@ -13,16 +13,17 @@ services:
       # Admin Web Port
       - '81:81'
     volumes:
-      # Konfigurationsdateien
-      - ./config/nginx:/app/config
-      - ./config/letsencrypt:/etc/letsencrypt
+      # NPM Daten und Konfiguration
       - ./data:/data
-      # Nginx Konfiguration mounten für manuelle Bearbeitung
-      - ./nginx-config:/etc/nginx/conf.d
+      - ./config/letsencrypt:/etc/letsencrypt
+      # Nur für zusätzliche Custom Configs (optional)
+      - ./nginx-config/custom:/data/nginx/custom:ro
     environment:
       # Sichere Standardkonfiguration
       - DB_SQLITE_FILE=/data/database.sqlite
       - DISABLE_IPV6=true
+      # Für externe Domain konfiguration
+      - DEFAULT_EMAIL=admin@example.com
     networks:
       - proxy-network
     healthcheck:

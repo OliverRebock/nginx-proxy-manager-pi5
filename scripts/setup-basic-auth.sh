@@ -15,10 +15,10 @@ if ! command -v htpasswd &> /dev/null; then
 fi
 
 # Erstelle nginx-config Verzeichnis falls nicht vorhanden
-mkdir -p ./nginx-config
+mkdir -p ./nginx-config/custom
 
 # Prüfe ob .htpasswd bereits existiert
-if [ -f "./nginx-config/.htpasswd" ]; then
+if [ -f "./nginx-config/custom/.htpasswd" ]; then
     echo "⚠️ Basic Auth Datei existiert bereits."
     echo "Möchtest du:"
     echo "1) Passwort für 'admin' ändern"
@@ -30,16 +30,16 @@ if [ -f "./nginx-config/.htpasswd" ]; then
     case $choice in
         1)
             echo "🔧 Ändere Passwort für Benutzer 'admin'..."
-            htpasswd ./nginx-config/.htpasswd admin
+            htpasswd ./nginx-config/custom/.htpasswd admin
             ;;
         2)
             echo "👤 Neuen Benutzer hinzufügen..."
             read -p "Benutzername: " username
-            htpasswd ./nginx-config/.htpasswd "$username"
+            htpasswd ./nginx-config/custom/.htpasswd "$username"
             ;;
         3)
             echo "🆕 Erstelle neue Basic Auth Datei..."
-            rm ./nginx-config/.htpasswd
+            rm ./nginx-config/custom/.htpasswd
             ;;
         4)
             echo "❌ Abgebrochen."
@@ -53,7 +53,7 @@ if [ -f "./nginx-config/.htpasswd" ]; then
 fi
 
 # Erstelle neue .htpasswd Datei falls nicht vorhanden
-if [ ! -f "./nginx-config/.htpasswd" ]; then
+if [ ! -f "./nginx-config/custom/.htpasswd" ]; then
     echo ""
     echo "🆕 Erstelle neue Basic Auth Datei..."
     echo "Benutzername: admin"
@@ -91,10 +91,10 @@ if [ ! -f "./nginx-config/.htpasswd" ]; then
         fi
         
         # Erstelle htpasswd Datei mit bcrypt (sicherer)
-        if echo "$password1" | htpasswd -c -i -B ./nginx-config/.htpasswd admin 2>/dev/null; then
+        if echo "$password1" | htpasswd -c -i -B ./nginx-config/custom/.htpasswd admin 2>/dev/null; then
             echo "✅ Basic Auth erfolgreich erstellt mit bcrypt Verschlüsselung!"
             auth_success=true
-        elif echo "$password1" | htpasswd -c -i ./nginx-config/.htpasswd admin 2>/dev/null; then
+        elif echo "$password1" | htpasswd -c -i ./nginx-config/custom/.htpasswd admin 2>/dev/null; then
             echo "✅ Basic Auth erfolgreich erstellt!"
             auth_success=true
         else
@@ -125,19 +125,19 @@ if [ ! -f "./nginx-config/.htpasswd" ]; then
 fi
 
 # Setze korrekte Berechtigungen
-chmod 644 ./nginx-config/.htpasswd
+chmod 644 ./nginx-config/custom/.htpasswd
 
 echo ""
 echo "✅ Basic Auth Setup abgeschlossen!"
 echo ""
-echo "📁 Datei: ./nginx-config/.htpasswd"
+echo "📁 Datei: ./nginx-config/custom/.htpasswd"
 echo "👤 Benutzer: admin"
 echo ""
 echo "🔧 Weitere Aktionen:"
-echo "- Passwort ändern: htpasswd ./nginx-config/.htpasswd admin"
-echo "- Benutzer hinzufügen: htpasswd ./nginx-config/.htpasswd BENUTZERNAME"
-echo "- Benutzer löschen: htpasswd -D ./nginx-config/.htpasswd BENUTZERNAME"
-echo "- Datei anzeigen: cat ./nginx-config/.htpasswd"
+echo "- Passwort ändern: htpasswd ./nginx-config/custom/.htpasswd admin"
+echo "- Benutzer hinzufügen: htpasswd ./nginx-config/custom/.htpasswd BENUTZERNAME"
+echo "- Benutzer löschen: htpasswd -D ./nginx-config/custom/.htpasswd BENUTZERNAME"
+echo "- Datei anzeigen: cat ./nginx-config/custom/.htpasswd"
 echo ""
 echo "🔄 Nach Änderungen Container neu starten:"
 echo "   docker compose restart nginx-proxy-manager"
