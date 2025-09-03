@@ -89,11 +89,70 @@ echo ""
 echo "🔒 Basic Authentication einrichten..."
 echo "Für zusätzliche Sicherheit wird ein Basic Auth Passwort benötigt."
 echo "Benutzername: admin"
-echo "Bitte gib ein sicheres Passwort ein:"
 
-if ! htpasswd -c ./nginx-config/.htpasswd admin; then
-    echo "❌ Fehler beim Erstellen der Basic Auth Datei!"
-    exit 1
+# Verbesserte Passwort-Eingabe mit Retry-Logik
+auth_success=false
+retry_count=0
+max_retries=3
+
+while [ "$auth_success" = false ] && [ $retry_count -lt $max_retries ]; do
+    echo ""
+    echo "Versuch $((retry_count + 1)) von $max_retries"
+    echo "Bitte gib ein sicheres Passwort ein (mindestens 8 Zeichen):"
+    
+    # Passwort ohne Echo eingeben
+    read -s -p "Passwort: " password1
+    echo ""
+    read -s -p "Passwort wiederholen: " password2
+    echo ""
+    
+    # Passwörter vergleichen
+    if [ "$password1" != "$password2" ]; then
+        echo "❌ Passwörter stimmen nicht überein!"
+        retry_count=$((retry_count + 1))
+        continue
+    fi
+    
+    # Passwort-Länge prüfen
+    if [ ${#password1} -lt 8 ]; then
+        echo "❌ Passwort muss mindestens 8 Zeichen haben!"
+        retry_count=$((retry_count + 1))
+        continue
+    fi
+    
+    # htpasswd mit Passwort aus Variable
+    if echo "$password1" | htpasswd -c -i ./nginx-config/.htpasswd admin; then
+        echo "✅ Basic Auth erfolgreich erstellt!"
+        auth_success=true
+    else
+        echo "❌ Fehler beim Erstellen der Basic Auth Datei!"
+        retry_count=$((retry_count + 1))
+    fi
+    
+    # Passwort-Variablen löschen
+    unset password1
+    unset password2
+done
+
+if [ "$auth_success" = false ]; then
+    echo ""
+    echo "❌ Basic Auth konnte nach $max_retries Versuchen nicht erstellt werden."
+    echo "💡 Alternative: Erstelle die Datei manuell nach dem Setup:"
+    echo "   htpasswd -c ./nginx-config/.htpasswd admin"
+    echo ""
+    echo "Soll das Setup trotzdem fortgesetzt werden? (j/n)"
+    read -r continue_setup
+    
+    if [[ ! $continue_setup =~ ^[Jj]$ ]]; then
+        echo "Setup abgebrochen."
+        exit 1
+    fi
+    
+    # Erstelle eine temporäre .htpasswd mit Standard-Passwort
+    echo "⚠️ Erstelle temporäre Basic Auth mit Passwort 'changeme123'"
+    echo 'changeme123' | htpasswd -c -i ./nginx-config/.htpasswd admin
+    echo "🔧 WICHTIG: Ändere das Passwort nach dem Setup mit:"
+    echo "   htpasswd ./nginx-config/.htpasswd admin"
 fi
 
 # Erstelle selbstsignierte Zertifikate für interne Domain
