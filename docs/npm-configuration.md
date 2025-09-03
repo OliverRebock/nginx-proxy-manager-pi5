@@ -10,11 +10,15 @@
 
 ### 2. SSL Zertifikat für externe Domain erstellen
 
+⚠️ **NUR für externe Domain**: `myhomeassi23.ddns.net`
+
 **SSL Certificates → Add SSL Certificate → Let's Encrypt**
 - Domain Names: `myhomeassi23.ddns.net`
 - Email: `deine-email@domain.com`
 - ✅ Use DNS Challenge (empfohlen für bessere Sicherheit)
 - DNS Provider: je nach Anbieter konfigurieren
+
+**WICHTIG**: Let's Encrypt funktioniert NUR für öffentlich erreichbare Domains!
 
 ### 3. Proxy Host für externe Domain erstellen
 
@@ -56,20 +60,34 @@ location /admin {
 
 ### 4. Selbstsigniertes Zertifikat für interne Domain
 
+⚠️ **WICHTIG**: Für `chef.fritz.box` KEIN Let's Encrypt verwenden! 
+Interne Domains brauchen Custom Zertifikate.
+
+**Schritt 4a: Zertifikat erstellen (auf dem Pi)**
+```bash
+# Falls noch nicht vorhanden, erstelle SSL Zertifikate
+cd ~/nginx-proxy-manager-pi5
+mkdir -p ssl-certs
+
+# Erstelle selbstsigniertes Zertifikat
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout ssl-certs/chef.fritz.box.key \
+    -out ssl-certs/chef.fritz.box.crt \
+    -subj "/C=DE/ST=Germany/L=Home/O=HomeNetwork/OU=IT/CN=chef.fritz.box"
+
+# Zertifikat-Inhalte anzeigen zum Kopieren
+echo "=== PRIVATE KEY ==="
+cat ssl-certs/chef.fritz.box.key
+echo "=== CERTIFICATE ==="
+cat ssl-certs/chef.fritz.box.crt
+```
+
+**Schritt 4b: Custom Zertifikat in NPM hinzufügen**
+
 **SSL Certificates → Add SSL Certificate → Custom**
 - Name: `chef.fritz.box`
-- Certificate Key: 
-```
------BEGIN PRIVATE KEY-----
-[Inhalt der ./nginx-config/ssl/chef.fritz.box.key]
------END PRIVATE KEY-----
-```
-- Certificate:
-```
------BEGIN CERTIFICATE-----
-[Inhalt der ./nginx-config/ssl/chef.fritz.box.crt]
------END CERTIFICATE-----
-```
+- Certificate Key: [Inhalt von chef.fritz.box.key komplett kopieren]
+- Certificate: [Inhalt von chef.fritz.box.crt komplett kopieren]
 
 ### 5. Proxy Host für interne Domain erstellen
 
